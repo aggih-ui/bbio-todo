@@ -239,15 +239,28 @@ main {
   overflow-x: hidden;
 }
 
-.item.done {
-  background: rgba(71,85,105,.92);
-  border-left-color: #94a3b8;
-  opacity: .68;
-}
-
 .item.overdue {
   background: rgba(127,29,29,.96);
   border-left-color: #ef4444;
+}
+
+/* Ólokið verkefni sem hefur færst frá eldri degi */
+.item.carried {
+  background: rgba(88,28,135,.96);
+  border-left-color: #c084fc;
+}
+
+/* Staða: Í vinnslu */
+.item.inProgress {
+  background: rgba(161,98,7,.96);
+  border-left-color: #facc15;
+}
+
+/* Staða: Lokið */
+.item.done {
+  background: rgba(22,101,52,.96);
+  border-left-color: #4ade80;
+  opacity: 1;
 }
 
 .time {
@@ -313,6 +326,11 @@ main {
   opacity: .75;
 }
 
+.carriedTag {
+  color: #e9d5ff;
+  font-weight: 900;
+}
+
 .status {
   white-space: nowrap;
   justify-self: stretch;
@@ -327,12 +345,22 @@ main {
 
 }
 
-.done .status {
-  background: #64748b;
-}
-
 .overdue .status {
   background: #dc2626;
+}
+
+.carried .status {
+  background: #7e22ce;
+}
+
+.inProgress .status {
+  background: #facc15;
+  color: #111827;
+}
+
+.done .status {
+  background: #16a34a;
+  color: white;
 }
 
 .empty, .error {
@@ -458,7 +486,7 @@ footer {
   </main>
 
   <footer>
-    <span>Live Google Sheet · 3 dálka test · TODO + Vinnuplan · F11</span>
+    <span>Live Google Sheet · Sjálfvirk yfirfærsla · TODO + Vinnuplan · F11</span>
     <span id="apiStatus">API</span>
   </footer>
 </div>
@@ -613,8 +641,10 @@ function render(data) {
     items.forEach(function(item) {
       const cls = [
         "item",
-        item.isDone ? "done" : "",
-        item.isOverdue ? "overdue" : ""
+        item.isOverdue ? "overdue" : "",
+        item.isCarriedForward ? "carried" : "",
+        item.isInProgress ? "inProgress" : "",
+        item.isDone ? "done" : ""
       ].join(" ");
 
       const details = [];
@@ -623,6 +653,9 @@ function render(data) {
       if (item.area) details.push(`<strong>Svæði:</strong> ${esc(item.area)}`);
       if (item.category) details.push(`<strong>Flokkur:</strong> ${esc(item.category)}`);
       if (item.comment) details.push(`<span class="commentInline"><strong>Athugasemd:</strong> ${esc(item.comment)}</span>`);
+      if (item.isCarriedForward && item.originalDayTitle) {
+        details.push(`<span class="carriedTag">Fært frá: ${esc(item.originalDayTitle)}</span>`);
+      }
       if (item.source) details.push(`<span class="sourceTag">${esc(item.source)}</span>`);
 
       const commentBlock = item.comment
